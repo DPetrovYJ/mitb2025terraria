@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MITB 2025 Terarria Picks</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: auto;
+        padding: 20px;
+        background-color: #f2f2f2;
+      }
+      h1,
+      h2 {
+        text-align: center;
+      }
+      label,
+      select,
+      input[type="text"] {
+        display: block;
+        margin: 15px 0 5px;
+        width: 100%;
+      }
+      input,
+      select {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      button {
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .prediction-entry {
+        background: #fff;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+      }
+    </style>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAMQFGFNXlQ1lhRjXaBQ_qpOY084-sX2m0",
+        authDomain: "mitb2025terarria.firebaseapp.com",
+        projectId: "mitb2025terarria",
+        storageBucket: "mitb2025terarria.firebasestorage.app",
+        messagingSenderId: "445415408115",
+        appId: "1:445415408115:web:ea0947c41fe1194f525286",
+        measurementId: "G-GBS9DCR1R8",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      window.submitForm = async function () {
+        const prediction = {
+          name: document.getElementById("username").value.trim(),
+          mens_mitb: document.getElementById("mens_mitb").value,
+          womens_mitb: document.getElementById("womens_mitb").value,
+          tag_match: document.getElementById("tag_match").value,
+          womens_title: document.getElementById("womens_title").value,
+          cash_in: document.getElementById("cash_in").value,
+          timestamp: new Date(),
+        };
+
+        if (!prediction.name) {
+          alert("Please enter your name.");
+          return;
+        }
+
+        try {
+          await addDoc(collection(db, "predictions"), prediction);
+          alert("Thank you for your picks, " + prediction.name + "!");
+          document.getElementById("predictionForm").reset();
+          loadPredictions();
+        } catch (e) {
+          console.error("Error adding document: ", e);
+          alert("Failed to submit. Try again later.");
+        }
+      };
+
+      async function loadPredictions() {
+        const container = document.getElementById("predictionsList");
+        container.innerHTML = "<h2>Submitted Predictions</h2>";
+
+        const querySnapshot = await getDocs(collection(db, "predictions"));
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "prediction-entry";
+          div.innerHTML = `
+          <strong>${data.name}</strong><br/>
+          Men's MiTB: ${data.mens_mitb}<br/>
+          Women's MiTB: ${data.womens_mitb}<br/>
+          Tag Match: ${data.tag_match}<br/>
+          Lyra vs. Becky: ${data.womens_title}<br/>
+          Cash In Tonight: ${data.cash_in}
+        `;
+          container.appendChild(div);
+        });
+      }
+
+      window.addEventListener("DOMContentLoaded", loadPredictions);
+    </script>
+  </head>
+  <body>
+    <h1>MITB 2025 Terarria Picks</h1>
+    <form id="predictionForm">
+      <label for="username">Enter Your Name:</label>
+      <input type="text" id="username" required />
+
+      <label for="mens_mitb">Men's MiTB Winner:</label>
+      <select id="mens_mitb">
+        <option>Solo Sikoa</option>
+        <option>LA Knight</option>
+        <option>Penta</option>
+        <option>Seth Rollins</option>
+        <option>Andrade</option>
+        <option>El Grande Americano</option>
+      </select>
+
+      <label for="womens_mitb">Women's MiTB Winner:</label>
+      <select id="womens_mitb">
+        <option>Alexa Bliss</option>
+        <option>Roxanne Perez</option>
+        <option>Rhea Ripley</option>
+        <option>Giulia</option>
+        <option>Naomi</option>
+        <option>Stephanie Vaquer</option>
+      </select>
+
+      <label for="tag_match">Cody & Jey vs. Cena & Logan:</label>
+      <select id="tag_match">
+        <option>Cody Rhodes & Jey Uso</option>
+        <option>John Cena & Logan Paul</option>
+      </select>
+
+      <label for="womens_title">Lyra vs. Becky:</label>
+      <select id="womens_title">
+        <option>Lyra Valkyria</option>
+        <option>Becky Lynch</option>
+      </select>
+
+      <label for="cash_in">Will MiTB winner cash in tonight?</label>
+      <select id="cash_in">
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+
+      <button type="button" onclick="submitForm()">Submit Picks</button>
+    </form>
+
+    <div id="predictionsList"></div>
+  </body>
+</html>
